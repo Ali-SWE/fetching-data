@@ -2,6 +2,8 @@ const fetchData = async() => {
   const puppeteer = require("puppeteer")
   const URL = "https://banner9-registration.kfupm.edu.sa/StudentRegistrationSsb/ssb/term/termSelection?mode=search"
 
+  const buildingCollection = []
+  const sectionCollection = []
   // Launch the browser and open a new blank page
   const browser = await puppeteer.launch({
     headless: false,
@@ -60,7 +62,6 @@ const fetchData = async() => {
           const room = data.substring(data.indexOf("Room: ") + 6, data.indexOf(" Start"))
           const startTime = formatTime(data.substring(data.indexOf("SMTWTFS") + 7, data.indexOf(" -")))
           const endTime = formatTime(data.substring(data.indexOf("-") + 2 , data.indexOf(" Type")))
-          console.log(days + "," + building + "," + room + "," + startTime + "," + endTime)
         }
         
       }      

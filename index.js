@@ -57,26 +57,13 @@ const fetchData = async() => {
       
       if (tdElement) {
         const data = await tdElement.evaluate(element => element.getAttribute('title'));
-        if(!data.includes("None") && !data.includes("Gym") && !data.includes("(Sport Complex)")){
-          const days= addDays(data)
-          const building = data.substring(data.indexOf("#") + 1, data.indexOf(" Room"))
-          const room = data.substring(data.indexOf("Room: ") + 6, data.indexOf(" Start"))
-          const startTime = formatTime(data.substring(data.indexOf("SMTWTFS") + 7, data.indexOf(" -")))
-          const endTime = formatTime(data.substring(data.indexOf("-") + 2 , data.indexOf(" Type")))
-
-          // adding buildings if necessary
-          addBuildingAndRoom(buildingCollection, building, room)
+        if(!data.includes("None")){ //&& !data.includes("Gym") && !data.includes("(Sport Complex)")
+          // adding buildings and rooms
+          addBuildingsAndRooms(buildingCollection, data)
 
           //adding sections
-          sectionCollection.push({
-            building: building,
-            days: days,
-            room: room,
-            startTime: startTime,
-            endTime: endTime
-          })
+          addSections(sectionCollection, data)
         }
-        
       }      
     }
     //Clicking next to go to the next page
@@ -114,7 +101,28 @@ function addDays(s){
   return result
 }
 
-function addBuildingAndRoom(buildingCollection, buildingNumber, roomNumber) {
+function addSections(sectionCollection, data){
+
+  const days= addDays(data)
+  const building = data.substring(data.indexOf("#") + 1, data.indexOf(" Room"))
+  const room = data.substring(data.indexOf("Room: ") + 6, data.indexOf(" Start"))
+  const startTime = formatTime(data.substring(data.indexOf("SMTWTFS") + 7, data.indexOf(" -")))
+  const endTime = formatTime(data.substring(data.indexOf("-") + 2 , data.indexOf(" Type")))
+
+  sectionCollection.push({
+    days: days,
+    buildingNumber: building,
+    roomNumber: room,
+    startTime: startTime,
+    endTime: endTime
+  })
+}
+
+function addBuildingsAndRooms(buildingCollection, data) {
+
+  const buildingNumber = data.substring(data.indexOf("#") + 1, data.indexOf(" Room"))
+  const roomNumber = data.substring(data.indexOf("Room: ") + 6, data.indexOf(" Start"))
+
   // Check if the building already exists in the collection
   const existingBuilding = buildingCollection.find(
     (building) => building.buildingNumber === buildingNumber
@@ -143,10 +151,44 @@ function formatTime(time){
     hours += (time.includes("PM")) ? 12 : 0;
   }  
 
-  return new Date(0,0,0, hours, minutes)
+  const date = new Date()
+  date.setHours(hours, minutes, 0)
+
+  return date
+}
+
+function saveToJsonFile(filename, data){
+  const fs = require('fs');
+
+  // Convert the JavaScript object to a JSON string
+  const jsonString = JSON.stringify(data);
+
+  // Write the JSON string to a file
+  fs.writeFile(filename + '.json', jsonString, 'utf8', (err) => {
+    if (err) {
+      console.error('Error writing JSON file:', err);
+      return;
+    }
+    console.log('JSON file has been saved successfully.');
+  });
 }
 
 fetchData()
+
+(async () => {
+  try {
+    const [buildingCollection, sectionCollection] = await fetchData();
+
+    console.log(buildingCollection);
+    console.log(sectionCollection);
+    saveToJsonFile("buildings", buildingCollection)
+    saveToJsonFile("sections", sectionCollectionCollection)
+
+  } catch (error) {
+    console.error(error);
+  }
+})();
+
 
 
 

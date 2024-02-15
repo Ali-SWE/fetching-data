@@ -4,6 +4,7 @@ const fetchData = async() => {
 
   const buildingCollection = []
   const sectionCollection = []
+
   // Launch the browser and open a new blank page
   const browser = await puppeteer.launch({
     headless: false,
@@ -57,11 +58,23 @@ const fetchData = async() => {
       if (tdElement) {
         const data = await tdElement.evaluate(element => element.getAttribute('title'));
         if(!data.includes("None") && !data.includes("Gym") && !data.includes("(Sport Complex)")){
-          const days = addDays(data);
+          const days= addDays(data)
           const building = data.substring(data.indexOf("#") + 1, data.indexOf(" Room"))
           const room = data.substring(data.indexOf("Room: ") + 6, data.indexOf(" Start"))
           const startTime = formatTime(data.substring(data.indexOf("SMTWTFS") + 7, data.indexOf(" -")))
           const endTime = formatTime(data.substring(data.indexOf("-") + 2 , data.indexOf(" Type")))
+
+          // adding buildings if necessary
+          addBuildingAndRoom(buildingCollection, building, room)
+
+          //adding sections
+          sectionCollection.push({
+            building: building,
+            days: days,
+            room: room,
+            startTime: startTime,
+            endTime: endTime
+          })
         }
         
       }      
@@ -76,27 +89,48 @@ const fetchData = async() => {
     });
   }
   // Closing Browser
-  // await browser.close(); 
+  await browser.close(); 
+
+  return [buildingCollection, sectionCollection]
 }
 
 function addDays(s){
-  let result = ""
+  let result = []
   if(s.includes("Sunday")){
-    result += "U"
+    result.push("U")
   }
   if(s.includes("Monday")){
-    result += "M"
+        result.push("M")
   }
   if(s.includes("Tuesday")){
-    result += "T"
+        result.push("T")
   }
   if(s.includes("Wednesday")){
-    result += "W"
+        result.push("W")
   }
   if(s.includes("Thursday")){
-    result += "R"
+        result.push("R")
   }
   return result
+}
+
+function addBuildingAndRoom(buildingCollection, buildingNumber, roomNumber) {
+  // Check if the building already exists in the collection
+  const existingBuilding = buildingCollection.find(
+    (building) => building.buildingNumber === buildingNumber
+  );
+
+  if (existingBuilding) {
+    // Check if the room is already added to the existing building
+    if (!existingBuilding.rooms.includes(roomNumber)) {
+      // Add the room to the existing building
+      existingBuilding.rooms.push(roomNumber);
+    }
+  } else {
+    // Create a new building object and add it to the collection
+    const newBuilding = { buildingNumber, rooms: [roomNumber] };
+    buildingCollection.push(newBuilding);
+  }
 }
 
 function formatTime(time){
@@ -109,7 +143,7 @@ function formatTime(time){
     hours += (time.includes("PM")) ? 12 : 0;
   }  
 
-  return hours + ":" + minutes
+  return new Date(0,0,0, hours, minutes)
 }
 
 fetchData()

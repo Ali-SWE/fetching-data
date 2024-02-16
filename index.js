@@ -6,9 +6,7 @@ const fetchData = async() => {
   const sectionCollection = []
 
   // Launch the browser and open a new blank page
-  const browser = await puppeteer.launch({
-    headless: false,
-  });
+  const browser = await puppeteer.launch({headless: false}); // add {headless: false} to view the browser
   const page = await browser.newPage();
 
   // Navigate the page to the URL
@@ -70,6 +68,7 @@ const fetchData = async() => {
     await page.evaluate(() => {
       const nextButton = document.querySelector('.next.enabled');
       isEnable = nextButton !== null
+      console.log(nextButton + " " + isEnable)
       if(isEnable){
         nextButton.click()
       }
@@ -158,6 +157,7 @@ function formatTime(time){
 }
 
 function saveToJsonFile(filename, data){
+  console.log("start saving")
   const fs = require('fs');
 
   // Convert the JavaScript object to a JSON string
@@ -173,16 +173,13 @@ function saveToJsonFile(filename, data){
   });
 }
 
-fetchData()
-
 (async () => {
   try {
     const [buildingCollection, sectionCollection] = await fetchData();
 
-    console.log(buildingCollection);
-    console.log(sectionCollection);
+    console.log("finish fetching")
     saveToJsonFile("buildings", buildingCollection)
-    saveToJsonFile("sections", sectionCollectionCollection)
+    saveToJsonFile("sections", sectionCollection)
 
   } catch (error) {
     console.error(error);

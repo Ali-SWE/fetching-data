@@ -55,7 +55,7 @@ const fetchData = async() => {
       
       if (tdElement) {
         const data = await tdElement.evaluate(element => element.getAttribute('title'));
-        if(!data.includes("None")){ //&& !data.includes("Gym") && !data.includes("(Sport Complex)")
+        if(!data.includes("None") && !data.includes("Gym") && !data.includes("(Sport Complex)")){ 
           // adding buildings and rooms
           addBuildingsAndRooms(buildingCollection, data)
 
@@ -64,15 +64,13 @@ const fetchData = async() => {
         }
       }      
     }
-    //Clicking next to go to the next page
-    await page.evaluate(() => {
-      const nextButton = document.querySelector('.next.enabled');
-      isEnable = nextButton !== null
-      console.log(nextButton + " " + isEnable)
-      if(isEnable){
-        nextButton.click()
+
+      // Clicking next to go to the next page
+      const nextButton = await page.$('.next.enabled');
+      isEnable = nextButton !== null;
+      if (isEnable) {
+        await nextButton.click();
       }
-    });
   }
   // Closing Browser
   await browser.close(); 

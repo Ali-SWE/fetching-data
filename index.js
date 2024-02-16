@@ -59,6 +59,9 @@ const fetchData = async() => {
           // adding buildings and rooms
           addBuildingsAndRooms(buildingCollection, data)
 
+          // Sort the buildings based on building numbers
+          buildingCollection.sort((a, b) => a.buildingNumber - b.buildingNumber);
+
           //adding sections
           addSections(sectionCollection, data)
         }
@@ -101,7 +104,7 @@ function addDays(s){
 function addSections(sectionCollection, data){
 
   const days= addDays(data)
-  const building = data.substring(data.indexOf("#") + 1, data.indexOf(" Room"))
+  const building = parseInt(data.substring(data.indexOf("#") + 1, data.indexOf(" Room")))
   const room = data.substring(data.indexOf("Room: ") + 6, data.indexOf(" Start"))
   const startTime = formatTime(data.substring(data.indexOf("SMTWTFS") + 7, data.indexOf(" -")))
   const endTime = formatTime(data.substring(data.indexOf("-") + 2 , data.indexOf(" Type")))
@@ -117,7 +120,7 @@ function addSections(sectionCollection, data){
 
 function addBuildingsAndRooms(buildingCollection, data) {
 
-  const buildingNumber = data.substring(data.indexOf("#") + 1, data.indexOf(" Room"))
+  const buildingNumber = parseInt(data.substring(data.indexOf("#") + 1, data.indexOf(" Room")))
   const roomNumber = data.substring(data.indexOf("Room: ") + 6, data.indexOf(" Start"))
 
   // Check if the building already exists in the collection

@@ -3,7 +3,7 @@ const fetchData = async() => {
   const URL = "https://banner9-registration.kfupm.edu.sa/StudentRegistrationSsb/ssb/term/termSelection?mode=search"
 
   const buildingCollection = []
-  const sectionCollection = []
+  const sectionCollection = {}
 
   // Launch the browser and open a new blank page
   const browser = await puppeteer.launch({headless: false}); // add {headless: false} to view the browser
@@ -109,13 +109,46 @@ function addSections(sectionCollection, data){
   const startTime = formatTime(data.substring(data.indexOf("SMTWTFS") + 7, data.indexOf(" -")))
   const endTime = formatTime(data.substring(data.indexOf("-") + 2 , data.indexOf(" Type")))
 
-  sectionCollection.push({
-    days: days,
-    buildingNumber: building,
-    roomNumber: room,
-    startTime: startTime,
-    endTime: endTime
-  })
+  // sectionCollection.push({
+  //   days: days,
+  //   buildingNumber: building,
+  //   roomNumber: room,
+  //   startTime: startTime,
+  //   endTime: endTime
+  // })
+  for (const day of days) {
+    let dayFound = false
+    for (const d in sectionCollection) {
+      if(d === day){
+        dayFound = true
+        const buildingObject = sectionCollection[d]
+        let buildingFound = false
+        for(const b in buildingObject){
+          if(building == b){
+            buildingFound = true
+            const roomObject = buildingObject[b]
+            let roomFound = false
+            for(const r in roomObject){
+              if(room == r){
+                roomFound = true
+                roomObject[room].push([startTime,endTime])
+              }
+            }
+            if(!roomFound){
+              roomObject[[room]] = [[startTime,endTime]]
+            }
+          }
+        }
+        if(!buildingFound){
+          buildingObject[building] = {[room]: [[startTime, endTime]]}
+        }
+      }
+    }
+    if(!dayFound){ 
+      sectionCollection[day] = { [building]: { [room]: [[startTime, endTime]]}}            
+    }
+  }
+
 }
 
 function addBuildingsAndRooms(buildingCollection, data) {
@@ -187,8 +220,88 @@ function saveToJsonFile(filename, data){
   }
 })();
 
+// const obj = [{U: []}, {M: []}, {T: []}, {W: []}, {R: []}]
+// const obj = {U: 
+//             {
+//               "22":
+//                 {"125": [["x","y"], ["c","v"]],
+//                 "130": ["a","s"]    
+//                 }  
+//               ,
+//               "59":
+//                 {"125": [["x","y"], ["c","v"]],
+//                 "130": ["a","s"]    
+//                 }
+//               }
+//             ,
+//             M:1,
+//             T: 99,
+//             W:
+//               {
+//               "22":
+//                 {"125": [["x","y"], ["c","v"]],
+//                 "130": ["a","s"]    
+//                 } 
+//               },
+//             R: 12
+//             }
+
+// const collection = {"U": []}
 
 
+// const days = ["U","W"]
+// const building =  22
+// const room = "125"
+// const startTime = "ali"
+// const endTime = "mustafa"
+// for (const day of days) {
+//   let dayFound = false
+//   for (const key in obj) {
+//     if(key === day){
+//       dayFound = true
+//       const buildingObject = obj[key]
+//       let buildingFound = false
+//       for(const b in buildingObject){
+//         if(building == b){
+//           buildingFound = true
+//           const roomObject = buildingObject[b]
+//           let roomFound = false
+//           for(const r in roomObject){
+//             if(room === r){
+//               roomFound = true
+//               roomObject[room].push([startTime,endTime])
+//             }
+//           }
+//           if(!roomFound){
+//             roomObject[room] = [[startTime,endTime]]
+//           }
+//         }
+//       }
+//       if(!buildingFound){
+//         buildingObject[building] = {room: [[startTime, endTime]]}
+//       }
+//     }
+//   }
+//   if(!dayFound){
+//     obj[day] = {
+//                 day: 
+//                     { 
+//                       building: 
+//                               {
+//                                 room: [[startTime, endTime]]
+//                               }
+//                     }
+//                 }
+//   }
+// }
+
+// const d1 = new Date()
+// d1.setHours(17,30,0)
+// const d2 = new Date()
+// d2.setHours(11,30,0)
+
+// console.log(d1.getHours()===d2.getHours() && d1.getMinutes() === d2.getMinutes())
+// console.log(d2)
 
 
 

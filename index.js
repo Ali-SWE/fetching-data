@@ -17,7 +17,7 @@ const fetchData = async() => {
   // Selecting a Term
   const inputElement = await page.$('#txt_term')
   await page.evaluate((element) => {
-    element.setAttribute('listofsearchterms', '202320');
+    element.setAttribute('listofsearchterms', '202330');
   }, inputElement);
 
   // Clicking Continue
@@ -217,6 +217,7 @@ function saveToJsonFile(filename, data){
 
 (async () => {
   try {
+    console.log("start fetching")
     const [buildingCollection, sectionCollection] = await fetchData();
 
     console.log("finish fetching")
